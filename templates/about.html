@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}About — FraudShield{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <p class="hero-kicker">About this project</p>
+  <h1>What FraudShield actually is</h1>
+</section>
+
+<section class="about-content">
+  <div class="panel about-panel">
+    <h2>The dataset</h2>
+    <p>
+      Built on the <strong>IEEE-CIS Fraud Detection</strong> dataset (Kaggle) — around 590,000 real
+      e-commerce transactions, roughly 3.5% of them fraudulent. Every prediction you see in the
+      Detect Fraud stream comes from the held-out test split, transactions the models never saw
+      during training.
+    </p>
+  </div>
+
+  <div class="panel about-panel">
+    <h2>The models</h2>
+    <p>Nine models across five categories, all trained on the same preprocessed features:</p>
+    <table class="metrics-table">
+      <thead><tr><th>Category</th><th>Model</th></tr></thead>
+      <tbody>
+        <tr><td>Baseline</td><td>Logistic Regression</td></tr>
+        <tr><td>Bagging</td><td>Random Forest</td></tr>
+        <tr><td>Boosting</td><td>XGBoost</td></tr>
+        <tr><td>Gradient Boosting</td><td>CatBoost</td></tr>
+        <tr><td>Neural (supervised)</td><td>MLP</td></tr>
+        <tr><td>Classical anomaly detection</td><td>Isolation Forest</td></tr>
+        <tr><td>Deep anomaly detection</td><td>Autoencoder</td></tr>
+        <tr><td>Ensemble</td><td>Soft Voting</td></tr>
+        <tr><td>Ensemble</td><td>Stacking</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="panel about-panel">
+    <h2>How "real-time" works here</h2>
+    <p>
+      The live stream replays real, historical, labeled transactions from the test set in
+      chronological order — not synthetic data, and not an actual live payment feed (which this
+      project doesn't have access to). It's the most honest way to demonstrate real-time-style
+      behavior without fabricating data.
+    </p>
+  </div>
+
+  <div class="panel about-panel">
+    <h2>Limitations</h2>
+    <ul>
+      <li>This is a research/dissertation demo, not a production fraud system — no authentication, no audit logging, no rate limiting.</li>
+      <li>Manual entry only lets you override a handful of human-interpretable fields (amount, product code, card network/type, email domain, device type, hour of day). All other columns keep the values from whichever real transaction was loaded as a template.</li>
+      <li>Categories typed into the manual form that weren't seen during training are scored with frequency 0, matching how the training pipeline itself handles unseen categories.</li>
+    </ul>
+  </div>
+
+  <div class="panel about-panel">
+    <h2>Tech stack</h2>
+    <p>Flask · scikit-learn · XGBoost · CatBoost · TensorFlow/Keras · pandas · vanilla JS + Server-Sent Events for the live stream.</p>
+  </div>
+</section>
+{% endblock %}

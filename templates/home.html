@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}FraudShield — Real-Time Fraud Detection{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <p class="hero-kicker">Fraud Detection Demo with IEEE-CIS Dataset </p>
+  <h1>Evaluate real-time fraud signals across trained models.</h1>
+  <p class="hero-sub">
+    Nine trained models — from Logistic Regression to Stacking — scoring real, held-out
+    transactions live. Watch the signal, check any transaction by hand, or dig into how
+    each model actually performs.
+  </p>
+  <div class="hero-actions">
+    <a href="{{ url_for('detect') }}" class="btn btn-cta btn-lg">Start detecting</a>
+    <a href="{{ url_for('analytics_page') }}" class="btn btn-ghost btn-lg">View analytics</a>
+  </div>
+</section>
+
+<section class="stat-strip">
+  <div class="stat-card">
+    <span class="stat-card-value">{{ analytics.total }}</span>
+    <span class="stat-card-label">Test transactions loaded</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value">{{ analytics.fraud_count }}</span>
+    <span class="stat-card-label">Known fraud cases</span>
+  </div>
+  <div class="stat-card">
+    <span class="stat-card-value">{{ model_names|length }}</span>
+    <span class="stat-card-label">Models trained</span>
+  </div>
+  <div class="stat-card stat-card-accent">
+    <span class="stat-card-value">{{ analytics.best_model or "—" }}</span>
+    <span class="stat-card-label">Best model (PR-AUC)</span>
+  </div>
+</section>
+
+<section class="model-list-section">
+  <h2>Every model, side by side</h2>
+  <p class="section-sub">Nine approaches across five categories, all scored on the same held-out data.</p>
+  <div class="model-grid">
+    <div class="model-tile"><span class="model-tag">Baseline</span>Logistic Regression</div>
+    <div class="model-tile"><span class="model-tag">Bagging</span>Random Forest</div>
+    <div class="model-tile"><span class="model-tag">Boosting</span>XGBoost</div>
+    <div class="model-tile"><span class="model-tag">Gradient Boosting</span>CatBoost</div>
+    <div class="model-tile"><span class="model-tag">Neural</span>MLP</div>
+    <div class="model-tile"><span class="model-tag">Anomaly Detection</span>Isolation Forest</div>
+    <div class="model-tile"><span class="model-tag">Deep Anomaly Detection</span>Autoencoder</div>
+    <div class="model-tile"><span class="model-tag">Ensemble</span>Soft Voting</div>
+    <div class="model-tile"><span class="model-tag">Ensemble</span>Stacking</div>
+  </div>
+</section>
+{% endblock %}

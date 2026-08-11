@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Analytics — FraudShield{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <p class="hero-kicker">Analytics &amp; Insights</p>
+  <h1>How each model actually performs</h1>
+  <p class="page-sub">Computed live, right now, from every model scored against the loaded test set.</p>
+</section>
+
+<div class="analytics-grid">
+
+  <section class="panel chart-panel">
+    <h2>Dataset distribution</h2>
+    <canvas id="distributionChart" height="260"></canvas>
+  </section>
+
+  <section class="panel chart-panel">
+    <h2>Model performance — PR-AUC</h2>
+    <canvas id="prChart" height="260"></canvas>
+  </section>
+
+  <section class="panel chart-panel wide">
+    <h2>Precision / Recall / F1 by model</h2>
+    <canvas id="metricsChart" height="220"></canvas>
+  </section>
+
+  <section class="panel stats-panel">
+    <h2>Detection statistics</h2>
+    <dl class="stat-list">
+      <div><dt>Total transactions analyzed</dt><dd>{{ analytics.total }}</dd></div>
+      <div><dt>Known fraud cases</dt><dd>{{ analytics.fraud_count }}</dd></div>
+      <div><dt>Known legitimate cases</dt><dd>{{ analytics.legit_count }}</dd></div>
+      <div><dt>Fraud rate in test set</dt><dd>{{ "%.2f"|format(100 * analytics.fraud_count / analytics.total) }}%</dd></div>
+      <div><dt>Features (full set)</dt><dd>{{ analytics.n_features_full }}</dd></div>
+      <div><dt>Features (correlation-reduced)</dt><dd>{{ analytics.n_features_reduced }}</dd></div>
+      <div><dt>Best model</dt><dd class="accent-text">{{ analytics.best_model or "—" }}</dd></div>
+    </dl>
+  </section>
+
+  <section class="panel table-panel wide">
+    <h2>Full metrics table</h2>
+    <div class="table-scroll">
+      <table class="metrics-table">
+        <thead>
+          <tr>
+            <th>Model</th><th>ROC-AUC</th><th>PR-AUC</th><th>F1</th><th>Precision</th><th>Recall</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for name, m in analytics.metrics.items() %}
+          <tr class="{{ 'best-row' if name == analytics.best_model }}">
+            <td>{{ name }}</td>
+            <td>{{ m.roc_auc }}</td>
+            <td>{{ m.pr_auc }}</td>
+            <td>{{ m.f1 }}</td>
+            <td>{{ m.precision }}</td>
+            <td>{{ m.recall }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.ANALYTICS_DATA = {{ analytics|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

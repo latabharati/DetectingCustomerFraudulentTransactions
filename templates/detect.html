@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% block title %}Detect Fraud — FraudShield{% endblock %}
+
+{% block content %}
+<section class="detect-controls">
+  <div class="detect-controls-left">
+    <h1 class="page-title">Live transaction monitor</h1>
+    <p class="page-sub">Replays the held-out test set transaction by transaction.</p>
+  </div>
+
+  <div class="detect-controls-right">
+    <label class="control">
+      <span>Model</span>
+      <select id="modelSelect">
+        {% for m in model_names %}
+        <option value="{{ m }}">{{ m }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <div class="live-indicator" id="liveIndicator">
+      <span class="dot"></span>
+      <span id="liveLabel">Idle</span>
+    </div>
+
+    <button id="streamToggle" class="btn btn-cta">Start stream</button>
+  </div>
+</section>
+
+<!-- Signature element: live signal strip, ECG-style, one tick per scored transaction -->
+<section class="signal-strip-wrap">
+  <div class="signal-strip" id="signalStrip" aria-label="Live fraud score signal"></div>
+</section>
+
+<div class="layout">
+
+  <!-- LEFT SIDE: Ledger + Session Risk Chart -->
+  <div class="left-column">
+
+    <section class="panel ledger-panel">
+      <div class="panel-header">
+        <h2>Transaction ledger</h2>
+        <span class="panel-sub">Most recent first</span>
+      </div>
+
+      <div class="ledger-scroll" id="ledgerBody">
+        <div class="ledger-empty" id="ledgerEmpty">
+          No transactions yet — press "Start stream" to begin replaying the test set.
+        </div>
+      </div>
+    </section>
+
+    <section class="panel session-chart-panel">
+      <div class="panel-header">
+        <h2>Session risk chart</h2>
+        <span class="panel-sub">Fraud probability over current replay</span>
+      </div>
+
+      <div class="session-chart-wrap">
+        <div class="session-chart-empty" id="sessionChartEmpty">
+          Start the stream to build the session risk chart.
+        </div>
+        <div class="session-chart" id="sessionChart"></div>
+      </div>
+
+      <div class="session-chart-legend">
+        <span><i class="legend-dot safe"></i> Low risk</span>
+        <span><i class="legend-dot warn"></i> Medium risk</span>
+        <span><i class="legend-dot danger"></i> Flagged</span>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- RIGHT SIDE: Stats + Manual Check -->
+  <aside class="side-column">
+
+    <section class="panel stats-panel">
+      <h2>Session stats</h2>
+
+      <div class="stat-grid">
+        <div class="stat">
+          <span class="stat-value" id="statProcessed">0</span>
+          <span class="stat-label">Processed</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-value" id="statFlagged">0</span>
+          <span class="stat-label">Flagged</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-value" id="statRate">0.0%</span>
+          <span class="stat-label">Flag rate</span>
+        </div>
+
+        <div class="stat">
+          <span class="stat-value" id="statAccuracy">—</span>
+          <span class="stat-label">Matches label</span>
+        </div>
+      </div>
+
+      <div class="speed-control">
+        <label for="speedRange">Replay speed</label>
+        <input type="range" id="speedRange" min="0.15" max="2" step="0.05" value="0.8">
+        <span id="speedValue">0.8s / txn</span>
+      </div>
+    </section>
+
+    <section class="panel manual-panel">
+      <h2>Manual check</h2>
+      <p class="panel-sub">Start from a real transaction, then adjust the fields you want to test.</p>
+
+      <div class="manual-row">
+        <button id="loadRandomBtn" class="btn btn-ghost">Load random transaction</button>
+        <button id="loadFraudBtn" class="btn btn-ghost">Load a known fraud example</button>
+        <button id="loadLegitBtn" class="btn btn-ghost">Load a known legit example</button>
+        <span id="manualIndexLabel" class="index-label"></span>
+      </div>
+
+      <form id="manualForm" class="manual-form">
+        {% for field in editable_fields %}
+        <label class="field">
+          <span>{{ field.label }}</span>
+
+          {% if field.type == "select" %}
+          <select name="{{ field.name }}" data-field="{{ field.name }}"></select>
+          {% else %}
+          <input
+                  type="{{ field.type }}"
+                  name="{{ field.name }}"
+                  data-field="{{ field.name }}"
+                  step="{{ field.step|default('any') }}"
+          >
+          {% endif %}
+        </label>
+        {% endfor %}
+
+        <button type="submit" class="btn btn-cta manual-submit">Score this transaction</button>
+      </form>
+
+      <div id="manualResult" class="manual-result hidden">
+        <div class="manual-result-score">
+          <span id="manualProb" class="prob-value">—</span>
+          <span id="manualVerdict" class="verdict-pill">—</span>
+        </div>
+
+        <p class="manual-result-note" id="manualNote"></p>
+
+        <div id="manualShapBox" class="shap-box hidden">
+          <h3>Top SHAP explanations</h3>
+          <p id="manualShapNote" class="manual-result-note"></p>
+          <div id="manualShapList"></div>
+        </div>
+      </div>
+    </section>
+
+  </aside>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
